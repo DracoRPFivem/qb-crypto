@@ -41,7 +41,7 @@ Crypto = {
 
 
 Ticker = {
-    Enabled = false, -- Decide whether the real life price ticker should be enabled or not :)  
+    Enabled = true, -- Decide whether the real life price ticker should be enabled or not :)  
     coin = 'BTC', --- The coin, please make sure you find the actual name, for example: Bitcoin vs BTC, BTC would be correct
     currency = 'USD', -- For example USD, NOK, SEK, EUR, CAD and more here https://www.countries-ofthe-world.com/world-currencies.html
     tick_time = 2, --- Minutes (Minimum is 2 minutes) 20,160 Requests a month, Its recommended to get the free API key so the crypto script doesnt switch on and off if ratelimit is encountered
