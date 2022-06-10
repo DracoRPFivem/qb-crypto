@@ -79,18 +79,35 @@ local function HandlePriceChance()
     end
 
     if Crypto.History[coin][4] then
-        Crypto.History[coin][1] = {PreviousWorth = prevValue, NewWorth = currentValue}
+        -- Shift array index 1 to 3
+        for k=3,1,-1 do
+            Crypto.History[coin][k] = Crypto.History[coin][k+1]
+        end
+        -- Assign array index 4 to the latest result
+        Crypto.History[coin][4] = {PreviousWorth = prevValue, NewWorth = currentValue}
     else
         Crypto.History[coin][#Crypto.History[coin] + 1] = {PreviousWorth = prevValue, NewWorth = currentValue}
     end
 
     Crypto.Worth[coin] = currentValue
 
-    MySQL.insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
+    local history = json.encode(Crypto.History[coin])
+    local props = {
         ['worth'] = currentValue,
-        ['history'] = json.encode(Crypto.History[coin]),
-    })
-    RefreshCrypto()
+        ['history'] = history,
+        ['crypto'] = coin
+    }
+    MySQL.update(
+        'UPDATE crypto set worth = :worth, history = :history where crypto = :crypto',
+        props,
+        function(affectedRows)
+            if affectedRows < 1 then
+                print("Crypto not found, inserting new record for " .. coin)
+                MySQL.insert('INSERT INTO crypto (crypto, worth, history) VALUES (:crypto, :worth, :history)', props)
+            end
+            RefreshCrypto()
+        end
+    )
 end
 
 -- Commands
